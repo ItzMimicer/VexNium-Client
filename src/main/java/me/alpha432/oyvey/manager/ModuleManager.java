@@ -37,7 +37,7 @@ public class ModuleManager implements Jsonable, Util {
         register(new ClickGui());
         register(new Notifications());
         register(new Criticals());
-        register(new Hitboxes()); // <-- Add your Hitboxes module here
+        register(new Hitboxes()); // <-- Hitboxes module added
         register(new MCF());
         register(new Step());
         register(new ReverseStep());
@@ -48,8 +48,6 @@ public class ModuleManager implements Jsonable, Util {
     }
 
     public void register(Module module) {
-        // Ensure the module is drawn by default so it shows in GUI
-        module.drawn = true;
         getModules().add(module);
         fastRegistry.put(module.getClass(), module);
     }
