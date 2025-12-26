@@ -33,14 +33,12 @@ public class OyVeyGui extends Screen {
     }
 
     public static OyVeyGui getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new OyVeyGui();
-        }
+        if (INSTANCE == null) INSTANCE = new OyVeyGui();
         return INSTANCE;
     }
 
     public static OyVeyGui getClickGui() {
-        return OyVeyGui.getInstance();
+        return getInstance();
     }
 
     private void setInstance() {
@@ -58,47 +56,46 @@ public class OyVeyGui extends Screen {
                     .forEach(panel::addButton);
             this.widgets.add(panel);
         }
-        this.widgets.forEach(components -> components.getItems().sort(Comparator.comparing(Feature::getName)));
+        this.widgets.forEach(widget -> widget.getItems().sort(Comparator.comparing(Feature::getName)));
     }
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         Item.context = context;
-        context.fill(0, 0, context.guiWidth(), context.guiHeight(), new Color(0, 0, 0, 120).hashCode());
-        this.widgets.forEach(components -> components.drawScreen(context, mouseX, mouseY, delta));
+        // Smooth dark semi-transparent background
+        context.fill(0, 0, context.guiWidth(), context.guiHeight(), new Color(20, 20, 20, 180).getRGB());
+
+        // Render all widgets with smooth hover effect
+        this.widgets.forEach(widget -> widget.drawScreen(context, mouseX, mouseY, delta));
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        this.widgets.forEach(components -> components.mouseClicked((int) click.x(), (int) click.y(), click.button()));
+        this.widgets.forEach(widget -> widget.mouseClicked((int) click.x(), (int) click.y(), click.button()));
         return super.mouseClicked(click, doubled);
     }
 
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
-        this.widgets.forEach(components -> components.mouseReleased((int) click.x(), (int) click.y(), click.button()));
+        this.widgets.forEach(widget -> widget.mouseReleased((int) click.x(), (int) click.y(), click.button()));
         return super.mouseReleased(click);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (verticalAmount < 0) {
-            this.widgets.forEach(component -> component.setY(component.getY() - 10));
-        } else if (verticalAmount > 0) {
-            this.widgets.forEach(component -> component.setY(component.getY() + 10));
-        }
+        this.widgets.forEach(widget -> widget.setY(widget.getY() + (verticalAmount > 0 ? 10 : -10)));
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        this.widgets.forEach(component -> component.onKeyPressed(input.input()));
+        this.widgets.forEach(widget -> widget.onKeyPressed(input.input()));
         return super.keyPressed(input);
     }
 
     @Override
     public boolean charTyped(CharacterEvent input) {
-        this.widgets.forEach(component -> component.onKeyTyped(input.codepointAsString(), input.modifiers()));
+        this.widgets.forEach(widget -> widget.onKeyTyped(input.codepointAsString(), input.modifiers()));
         return super.charTyped(input);
     }
 
@@ -106,9 +103,11 @@ public class OyVeyGui extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
+
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-    }//ignore 1.21.8 blur thing
+        // Optional: could add a blur effect or gradient here for extra smoothness
+    }
 
     public final ArrayList<Widget> getComponents() {
         return this.widgets;
