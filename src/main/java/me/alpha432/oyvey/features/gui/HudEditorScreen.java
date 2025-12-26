@@ -12,6 +12,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -21,23 +22,30 @@ public class HudEditorScreen extends Screen {
     public boolean anyHover;
 
     public HudEditorScreen() {
-        super(Component.literal("oyvey-hudeditor"));
+        super(Component.literal("OyVey HUD Editor"));
         load();
     }
 
     private void load() {
-        Widget hud = new Widget("Hud", 50, 50, true);
+        Widget hud = new Widget("HUD", 50, 50, true);
         OyVey.moduleManager.stream()
                 .filter(m -> m.getCategory() == Module.Category.HUD && !m.hidden)
                 .map(ModuleButton::new)
                 .forEach(hud::addButton);
         this.components.add(hud);
+
+        // Sort components alphabetically
         this.components.forEach(component -> component.getItems().sort(Comparator.comparing(Feature::getName)));
     }
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         anyHover = false;
+
+        // Smooth dark semi-transparent background
+        context.fill(0, 0, context.guiWidth(), context.guiHeight(), new Color(20, 20, 20, 180).getRGB());
+
+        // Draw all HUD components
         this.components.forEach(component -> component.drawScreen(context, mouseX, mouseY, delta));
     }
 
@@ -55,11 +63,8 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (verticalAmount < 0) {
-            this.components.forEach(component -> component.setY(component.getY() - 10));
-        } else if (verticalAmount > 0) {
-            this.components.forEach(component -> component.setY(component.getY() + 10));
-        }
+        // Smooth vertical scrolling
+        this.components.forEach(component -> component.setY(component.getY() + (verticalAmount > 0 ? 10 : -10)));
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
@@ -80,13 +85,12 @@ public class HudEditorScreen extends Screen {
         return false;
     }
 
-    @Override // ignore 1.21.8 menu blur thing
+    @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // Optional: Add blur or gradient for more smoothness
     }
-
 
     public ArrayList<Widget> getComponents() {
         return components;
     }
 }
-
